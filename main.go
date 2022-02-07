@@ -2,37 +2,37 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/charconstpointer/httpclient-interceptor/fleet"
 )
 
-type MTripper struct {
-	rt http.RoundTripper
-}
-
-func (m MTripper) RoundTrip(request *http.Request) (*http.Response, error) {
-	fmt.Println("start")
-	now := time.Now()
-	defer func() {
-		elapsed := time.Since(now)
-		fmt.Println("request took, ", elapsed)
-	}()
-	return m.rt.RoundTrip(request)
-
-}
-
 func main() {
-	mt := MTripper{
-		http.DefaultTransport,
+	var AuthMiddleware = func(r *http.Request) {
+		log.Println("auth middleware, adding bearer token")
+		r.Header.Add("Authorization", "Bearer 12345")
 	}
-	c := http.Client{
-		Transport: mt,
+
+	var SleepMiddleware = func(_ *http.Request) {
+		log.Println("sleep middleware 3s")
+		time.Sleep(time.Second * 3)
 	}
+
+	var HeadersLoggerMiddleware = func(r *http.Request) {
+		log.Println(strings.Repeat("-", 20))
+		defer log.Println(strings.Repeat("-", 20))
+		log.Println(r.Header)
+	}
+
+	c := fleet.NewHTTPClient(AuthMiddleware, SleepMiddleware, HeadersLoggerMiddleware)
+
 	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, "https://example.com", nil)
 	if err != nil {
 		log.Fatalf("error: %e", err)
 	}
+
 	_, _ = c.Do(req)
 }
