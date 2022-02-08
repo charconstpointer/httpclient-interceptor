@@ -23,23 +23,11 @@ func (m MTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 		middleware(request)
 	}
 
-	req, err := http.NewRequest(http.MethodGet, "https://example.com", nil)
-	if err != nil {
-		return nil, err
-	}
-	res, err := m.rt.RoundTrip(req)
-	if err != nil {
-		return nil, err
-	}
-	fmt.Println("res done, ", res.StatusCode)
-	request.Header.Add("Authorization", "Bearer 12345")
-	fmt.Println("header", request.Header)
-	fmt.Println("start")
-
 	defer func() {
 		elapsed := time.Since(now)
 		fmt.Println("request took, ", elapsed)
 	}()
+
 	return m.rt.RoundTrip(request)
 }
 
