@@ -1,5 +1,5 @@
 # Example usage of `http.Transport` to intercept requests
-```(go)
+```go
 var AuthMiddleware = func(r *http.Request) {
     log.Println("auth middleware, adding bearer token")
     r.Header.Add("Authorization", "Bearer 12345")
