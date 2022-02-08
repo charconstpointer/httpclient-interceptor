@@ -8,16 +8,16 @@ import (
 
 type Middleware func(*http.Request)
 
-type MTripper struct {
+type CustomRoundTripper struct {
 	rt          http.RoundTripper
 	middlewares []Middleware
 }
 
-func (m *MTripper) Use(middleware Middleware) {
+func (m *CustomRoundTripper) Use(middleware Middleware) {
 	m.middlewares = append(m.middlewares, middleware)
 }
 
-func (m MTripper) RoundTrip(request *http.Request) (*http.Response, error) {
+func (m CustomRoundTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 	now := time.Now()
 	for _, middleware := range m.middlewares {
 		middleware(request)
@@ -32,7 +32,7 @@ func (m MTripper) RoundTrip(request *http.Request) (*http.Response, error) {
 }
 
 func NewHTTPClient(middlewares ...Middleware) *http.Client {
-	mt := MTripper{
+	mt := CustomRoundTripper{
 		rt: http.DefaultTransport,
 	}
 
